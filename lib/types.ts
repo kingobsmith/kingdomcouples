@@ -1,66 +1,45 @@
-export type Lane = "family" | "couples" | "singles";
+export type Lane = "singles" | "couples" | "family";
+export type MembershipType = "single" | "couple" | "family";
+export type UserRole = Lane | "admin";
 
-export type UserRole = "family" | "couples" | "singles" | "admin";
+export type MembershipStatus = "pending_payment" | "active" | "inactive";
+export type SubscriptionStatus = "inactive" | "active" | "canceled" | "past_due" | "unpaid";
 
-export interface FamilyMember {
-  id: string;
-  name: string;
-  email: string;
-  relationship: string;
-  age?: string;
-}
-
-export interface UserProfile {
+export interface Member {
   id: string;
   email: string;
-  password: string;
-  name: string;
+  passwordHash: string;
+  fullName: string;
+  phone: string;
+  city: string;
+  state: string;
+  country: string;
+  membershipType: MembershipType;
   lane: Lane;
   role: UserRole;
+  churchName?: string;
+  howDidYouHear?: string;
+  partnerName?: string;
+  partnerEmail?: string;
+  relationshipStage?: "married" | "engaged";
   householdName?: string;
-  familyMembers?: FamilyMember[];
-  church?: string;
-  denomination?: string;
-  testimony?: string;
-  bio?: string;
-  spouseName?: string;
-  childrenCount?: string;
-  onboardingComplete: boolean;
-  approved: boolean;
+  numberOfAdults?: number;
+  numberOfChildren?: number;
+  termsAccepted: boolean;
+  covenantAccepted: boolean;
+  membershipStatus: MembershipStatus;
+  subscriptionStatus: SubscriptionStatus;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  monthlyPrice?: number;
+  crmSynced: boolean;
+  crmSyncError?: string;
+  suspended: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
-export interface ConnectionRequest {
-  id: string;
-  fromId: string;
-  fromName: string;
-  toId: string;
-  message: string;
-  status: "pending" | "accepted" | "declined";
-  createdAt: string;
-}
-
-export interface Message {
-  id: string;
-  fromId: string;
-  fromName: string;
-  toId: string;
-  content: string;
-  createdAt: string;
-  read: boolean;
-}
-
-export interface PrayerRequest {
-  id: string;
-  userId: string;
-  userName: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  prayers: number;
-}
-
-export interface Event {
+export interface PlatformEvent {
   id: string;
   title: string;
   description: string;
@@ -68,13 +47,41 @@ export interface Event {
   location: string;
   lane: Lane | "all";
   hostName: string;
+  createdAt: string;
+}
+
+export interface Resource {
+  id: string;
+  title: string;
+  description: string;
+  lane: Lane | "all";
+  type: "devotional" | "game-night" | "covenant" | "retreat" | "general";
+  url?: string;
+  createdAt: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  lane: Lane | "all";
+  createdAt: string;
+}
+
+export interface InterestSubmission {
+  id: string;
+  memberId: string;
+  memberName: string;
+  lane: Lane;
+  type: "small-group" | "mentorship" | "accountability" | "general";
+  message: string;
+  createdAt: string;
 }
 
 export interface Report {
   id: string;
   reporterId: string;
   reporterName: string;
-  targetId: string;
   targetName: string;
   reason: string;
   details: string;
@@ -82,13 +89,16 @@ export interface Report {
   createdAt: string;
 }
 
+export const MEMBERSHIP_PRICE = 9.99;
+
 export const LANE_INFO = {
   family: {
     title: "Family Side",
-    subtitle: "Households connect with households",
+    subtitle: "Devotionals, game nights, household covenants, and community",
     description:
-      "Build strong Kingdom family networks. Arrange playdates, share resources, and grow together with vetted families in your community.",
-    color: "sage",
+      "Join for family devotionals, game nights, household covenants, and shared experiences with other Kingdom families.",
+    membershipLabel: "Choose Family Membership",
+    membershipType: "family" as MembershipType,
     borderColor: "border-kingdom-sage",
     bgLight: "bg-green-50",
     textColor: "text-kingdom-sage",
@@ -96,10 +106,11 @@ export const LANE_INFO = {
   },
   couples: {
     title: "Couples Corner",
-    subtitle: "Married couples connect with married couples",
+    subtitle: "Christian mingling, prayer, retreats, and accountability",
     description:
-      "Strengthen your covenant through fellowship, double-dates, mentorship, and shared wisdom with other Kingdom couples.",
-    color: "navy",
+      "Join for Christian mingling, retreats, prayer, marriage devotionals, and accountability with other covenant couples.",
+    membershipLabel: "Choose Couples Membership",
+    membershipType: "couple" as MembershipType,
     borderColor: "border-kingdom-navy",
     bgLight: "bg-blue-50",
     textColor: "text-kingdom-navy",
@@ -107,10 +118,11 @@ export const LANE_INFO = {
   },
   singles: {
     title: "Singles Ministry",
-    subtitle: "Friends-first Christian connection",
+    subtitle: "Fellowship and community — not dating",
     description:
-      "No dating pressure, no hookup energy. Meet Kingdom-minded believers where friendship comes first and chemistry decides later.",
-    color: "plum",
+      "Join for genuine Christian fellowship and community without dating pressure, romance matching, or swiping.",
+    membershipLabel: "Choose Singles Membership",
+    membershipType: "single" as MembershipType,
     borderColor: "border-kingdom-plum",
     bgLight: "bg-purple-50",
     textColor: "text-kingdom-plum",
@@ -118,7 +130,26 @@ export const LANE_INFO = {
   },
 } as const;
 
+export function laneFromMembership(type: MembershipType): Lane {
+  if (type === "single") return "singles";
+  if (type === "couple") return "couples";
+  return "family";
+}
+
+export function membershipFromLane(lane: Lane): MembershipType {
+  if (lane === "singles") return "single";
+  if (lane === "couples") return "couple";
+  return "family";
+}
+
 export function getDashboardPath(role: UserRole): string {
   if (role === "admin") return "/dashboard/admin";
   return `/dashboard/${role}`;
+}
+
+export type SafeMember = Omit<Member, "passwordHash">;
+
+export function toSafeMember(m: Member): SafeMember {
+  const { passwordHash, ...safe } = m;
+  return safe;
 }

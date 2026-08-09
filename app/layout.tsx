@@ -3,9 +3,9 @@ import { AuthProvider } from "@/lib/auth";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "KingdomCouples | Where Christians Come to Mingle",
+  title: "Kingdom Folk | Where Christians Come to Mingle",
   description:
-    "A Christian social platform for families, couples, and singles. No dating required — just Kingdom connection.",
+    "A Christian community for singles, couples, and families seeking genuine fellowship, stronger covenants, and Kingdom-centered connection.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

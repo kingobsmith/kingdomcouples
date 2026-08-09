@@ -1,154 +1,218 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import DashboardShell from "@/components/DashboardShell";
+import { SafeMember, PlatformEvent, Resource, Announcement, Report, Lane } from "@/lib/types";
 import { Tab } from "@/components/DashboardShell";
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const { user, loading, allUsers, reports, approveUser, resolveReport } = useAuth();
+  const { member, loading } = useAuth();
+  const [members, setMembers] = useState<SafeMember[]>([]);
+  const [filter, setFilter] = useState("");
+  const [events, setEvents] = useState<PlatformEvent[]>([]);
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
+
+  const [eventForm, setEventForm] = useState({ title: "", description: "", date: "", location: "", lane: "all" as Lane | "all", hostName: "" });
+  const [resourceForm, setResourceForm] = useState({ title: "", description: "", lane: "all" as Lane | "all", type: "general" as Resource["type"], url: "" });
+  const [announceForm, setAnnounceForm] = useState({ title: "", content: "", lane: "all" as Lane | "all" });
 
   useEffect(() => {
-    if (!loading && !user) router.push("/login");
-    if (!loading && user && user.role !== "admin") {
-      router.push(`/dashboard/${user.role}`);
-    }
-  }, [user, loading, router]);
+    if (!loading && !member) router.push("/login");
+    if (!loading && member && member.role !== "admin") router.push(`/dashboard/${member.lane}`);
+  }, [member, loading, router]);
 
-  if (loading || !user) return null;
+  async function loadMembers(f?: string) {
+    const url = f ? `/api/admin?type=members&filter=${f}` : "/api/admin?type=members";
+    const res = await fetch(url);
+    const data = await res.json();
+    setMembers(data.members || []);
+  }
 
-  const pendingUsers = allUsers.filter((u) => !u.approved && u.role !== "admin");
-  const pendingReports = reports.filter((r) => r.status === "pending");
+  async function loadAll() {
+    loadMembers(filter);
+    const [e, r, a, rep] = await Promise.all([
+      fetch("/api/admin?type=events").then((x) => x.json()),
+      fetch("/api/admin?type=resources").then((x) => x.json()),
+      fetch("/api/admin?type=announcements").then((x) => x.json()),
+      fetch("/api/admin?type=reports").then((x) => x.json()),
+    ]);
+    setEvents(e.events || []);
+    setResources(r.resources || []);
+    setAnnouncements(a.announcements || []);
+    setReports(rep.reports || []);
+  }
+
+  useEffect(() => {
+    if (member?.role === "admin") loadAll();
+  }, [member, filter]);
+
+  if (loading || !member) return null;
+
+  async function adminAction(action: string, payload: Record<string, unknown>) {
+    await fetch("/api/admin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, ...payload }) });
+    loadAll();
+  }
+
+  function exportMembers() {
+    const csv = ["Name,Email,Type,Membership,Subscription,CRM Synced,Stripe Customer,Stripe Sub"]
+      .concat(members.map((m) =>
+        `${m.fullName},${m.email},${m.membershipType},${m.membershipStatus},${m.subscriptionStatus},${m.crmSynced},${m.stripeCustomerId || ""},${m.stripeSubscriptionId || ""}`
+      )).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "kingdom-folk-members.csv";
+    a.click();
+  }
 
   function renderTab(tab: Tab) {
     if (tab === "overview") {
       return (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="card text-center">
-              <p className="text-3xl font-bold text-kingdom-navy">{allUsers.length}</p>
-              <p className="text-sm text-gray-500 mt-1">Total Members</p>
-            </div>
-            <div className="card text-center">
-              <p className="text-3xl font-bold text-yellow-600">{pendingUsers.length}</p>
-              <p className="text-sm text-gray-500 mt-1">Pending Approvals</p>
-            </div>
-            <div className="card text-center">
-              <p className="text-3xl font-bold text-red-600">{pendingReports.length}</p>
-              <p className="text-sm text-gray-500 mt-1">Open Reports</p>
-            </div>
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="card text-center"><p className="text-3xl font-bold text-kingdom-navy">{members.length}</p><p className="text-sm text-gray-500">Members</p></div>
+          <div className="card text-center"><p className="text-3xl font-bold text-green-600">{members.filter((m) => m.membershipStatus === "active").length}</p><p className="text-sm text-gray-500">Active</p></div>
+          <div className="card text-center"><p className="text-3xl font-bold text-yellow-600">{members.filter((m) => m.membershipStatus === "pending_payment").length}</p><p className="text-sm text-gray-500">Pending</p></div>
+          <div className="card text-center"><p className="text-3xl font-bold text-red-600">{reports.filter((r) => r.status === "pending").length}</p><p className="text-sm text-gray-500">Open Reports</p></div>
         </div>
       );
     }
 
-    if (tab === "moderation" || tab === "connections") {
+    if (tab === "lane") {
       return (
         <div className="space-y-6">
           <div className="card">
-            <h2 className="text-xl font-bold text-kingdom-navy mb-4">Pending Member Approvals</h2>
-            {pendingUsers.length === 0 && (
-              <p className="text-gray-500 text-sm">No pending approvals.</p>
-            )}
-            {pendingUsers.map((u) => (
-              <div key={u.id} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
-                <div>
-                  <p className="font-semibold">{u.name}</p>
-                  <p className="text-xs text-gray-400">{u.email} &middot; {u.lane}</p>
-                </div>
-                <button
-                  onClick={() => approveUser(u.id)}
-                  className="btn-primary text-sm py-1.5 px-4"
-                >
-                  Approve
+            <div className="flex flex-wrap gap-2 mb-4">
+              {["", "single", "couple", "family", "active", "pending", "inactive"].map((f) => (
+                <button key={f} onClick={() => setFilter(f)} className={`text-xs px-3 py-1 rounded-full ${filter === f ? "bg-kingdom-navy text-white" : "bg-gray-100"}`}>
+                  {f || "All"}
                 </button>
-              </div>
-            ))}
+              ))}
+              <button onClick={exportMembers} className="text-xs px-3 py-1 rounded-full bg-kingdom-gold text-kingdom-navy font-semibold ml-auto">Export CSV</button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead><tr className="text-left text-gray-500 border-b">
+                  <th className="py-2">Name</th><th>Email</th><th>Type</th><th>Status</th><th>CRM</th><th>Stripe</th><th></th>
+                </tr></thead>
+                <tbody>
+                  {members.map((m) => (
+                    <tr key={m.id} className="border-b border-gray-50">
+                      <td className="py-2 font-medium">{m.fullName}</td>
+                      <td className="text-gray-500">{m.email}</td>
+                      <td>{m.membershipType}</td>
+                      <td><span className={`text-xs px-2 py-0.5 rounded-full ${m.membershipStatus === "active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>{m.membershipStatus}</span></td>
+                      <td>{m.crmSynced ? "✓" : "✗"}</td>
+                      <td className="text-xs text-gray-400">{m.stripeCustomerId?.slice(0, 12) || "—"}</td>
+                      <td><button onClick={() => adminAction("suspend-member", { memberId: m.id })} className="text-xs text-red-600 hover:underline">Suspend</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div className="card">
-            <h2 className="text-xl font-bold text-kingdom-navy mb-4">Reports</h2>
-            {reports.length === 0 && (
-              <p className="text-gray-500 text-sm">No reports submitted.</p>
-            )}
+            <h3 className="font-bold text-kingdom-navy mb-4">Reports</h3>
             {reports.map((r) => (
-              <div key={r.id} className="py-3 border-b border-gray-100 last:border-0">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-semibold text-sm">Report against: {r.targetName}</p>
-                    <p className="text-xs text-gray-400">by {r.reporterName} &middot; {r.reason}</p>
-                    <p className="text-sm text-gray-600 mt-1">{r.details}</p>
-                  </div>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                    r.status === "resolved" ? "bg-green-100 text-green-700" :
-                    r.status === "reviewed" ? "bg-blue-100 text-blue-700" :
-                    "bg-yellow-100 text-yellow-700"
-                  }`}>
-                    {r.status}
-                  </span>
-                </div>
+              <div key={r.id} className="py-3 border-b border-gray-100 text-sm">
+                <p className="font-semibold">{r.targetName} — {r.reason}</p>
+                <p className="text-gray-500">{r.details}</p>
                 {r.status === "pending" && (
                   <div className="flex gap-2 mt-2">
-                    <button onClick={() => resolveReport(r.id, "reviewed")} className="text-xs btn-outline py-1 px-3">
-                      Mark Reviewed
-                    </button>
-                    <button onClick={() => resolveReport(r.id, "resolved")} className="text-xs btn-primary py-1 px-3">
-                      Resolve
-                    </button>
+                    <button onClick={() => adminAction("resolve-report", { reportId: r.id, status: "reviewed" })} className="text-xs btn-outline py-1 px-2">Reviewed</button>
+                    <button onClick={() => adminAction("resolve-report", { reportId: r.id, status: "resolved" })} className="text-xs btn-primary py-1 px-2">Resolved</button>
                   </div>
                 )}
               </div>
             ))}
           </div>
-
-          <div className="card">
-            <h2 className="text-xl font-bold text-kingdom-navy mb-4">All Members</h2>
-            {allUsers.filter(u => u.role !== "admin").map((u) => (
-              <div key={u.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0 text-sm">
-                <div>
-                  <span className="font-semibold">{u.name}</span>
-                  <span className="text-gray-400 ml-2">({u.lane})</span>
-                </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${u.approved ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-                  {u.approved ? "Approved" : "Pending"}
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
       );
     }
 
-    if (tab === "guidelines") {
+    if (tab === "events") {
+      return (
+        <div className="space-y-6">
+          <div className="card">
+            <h3 className="font-bold text-kingdom-navy mb-4">Create Event</h3>
+            <form onSubmit={(e) => { e.preventDefault(); adminAction("create-event", { event: eventForm }); setEventForm({ title: "", description: "", date: "", location: "", lane: "all", hostName: "" }); }} className="space-y-3">
+              <input className="input-field" placeholder="Title" value={eventForm.title} onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })} required />
+              <textarea className="input-field" placeholder="Description" value={eventForm.description} onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })} required />
+              <div className="grid grid-cols-2 gap-3">
+                <input className="input-field" type="date" value={eventForm.date} onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })} required />
+                <select className="input-field" value={eventForm.lane} onChange={(e) => setEventForm({ ...eventForm, lane: e.target.value as Lane | "all" })}>
+                  <option value="all">All Lanes</option><option value="singles">Singles</option><option value="couples">Couples</option><option value="family">Family</option>
+                </select>
+              </div>
+              <input className="input-field" placeholder="Location" value={eventForm.location} onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })} required />
+              <input className="input-field" placeholder="Host Name" value={eventForm.hostName} onChange={(e) => setEventForm({ ...eventForm, hostName: e.target.value })} required />
+              <button type="submit" className="btn-primary text-sm">Add Event</button>
+            </form>
+          </div>
+          {events.map((ev) => (
+            <div key={ev.id} className="card flex justify-between"><div><p className="font-semibold">{ev.title}</p><p className="text-sm text-gray-500">{ev.date} — {ev.lane}</p></div></div>
+          ))}
+        </div>
+      );
+    }
+
+    if (tab === "resources") {
+      return (
+        <div className="space-y-6">
+          <div className="card">
+            <h3 className="font-bold text-kingdom-navy mb-4">Add Resource</h3>
+            <form onSubmit={(e) => { e.preventDefault(); adminAction("create-resource", { resource: resourceForm }); setResourceForm({ title: "", description: "", lane: "all", type: "general", url: "" }); }} className="space-y-3">
+              <input className="input-field" placeholder="Title" value={resourceForm.title} onChange={(e) => setResourceForm({ ...resourceForm, title: e.target.value })} required />
+              <textarea className="input-field" placeholder="Description" value={resourceForm.description} onChange={(e) => setResourceForm({ ...resourceForm, description: e.target.value })} required />
+              <select className="input-field" value={resourceForm.type} onChange={(e) => setResourceForm({ ...resourceForm, type: e.target.value as Resource["type"] })}>
+                <option value="devotional">Devotional</option><option value="game-night">Game Night</option><option value="covenant">Covenant</option><option value="retreat">Retreat</option><option value="general">General</option>
+              </select>
+              <input className="input-field" placeholder="URL (optional)" value={resourceForm.url} onChange={(e) => setResourceForm({ ...resourceForm, url: e.target.value })} />
+              <button type="submit" className="btn-primary text-sm">Add Resource</button>
+            </form>
+          </div>
+          {resources.map((r) => (
+            <div key={r.id} className="card"><p className="font-semibold">{r.title}</p><p className="text-sm text-gray-500">{r.type} — {r.lane}</p></div>
+          ))}
+        </div>
+      );
+    }
+
+    if (tab === "support") {
       return (
         <div className="card">
-          <h2 className="text-xl font-bold text-kingdom-navy mb-4">Moderation Guidelines</h2>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li>Review all new member signups within 48 hours</li>
-            <li>Investigate reports promptly and document actions</li>
-            <li>Remove accounts that violate community standards</li>
-            <li>Ensure family accounts have verified parent/guardian</li>
-            <li>Monitor messaging for safety concerns</li>
-          </ul>
+          <h3 className="font-bold text-kingdom-navy mb-4">Create Announcement</h3>
+          <form onSubmit={(e) => { e.preventDefault(); adminAction("create-announcement", { announcement: announceForm }); setAnnounceForm({ title: "", content: "", lane: "all" }); }} className="space-y-3">
+            <input className="input-field" placeholder="Title" value={announceForm.title} onChange={(e) => setAnnounceForm({ ...announceForm, title: e.target.value })} required />
+            <textarea className="input-field" placeholder="Content" value={announceForm.content} onChange={(e) => setAnnounceForm({ ...announceForm, content: e.target.value })} required />
+            <select className="input-field" value={announceForm.lane} onChange={(e) => setAnnounceForm({ ...announceForm, lane: e.target.value as Lane | "all" })}>
+              <option value="all">All</option><option value="singles">Singles</option><option value="couples">Couples</option><option value="family">Family</option>
+            </select>
+            <button type="submit" className="btn-primary text-sm">Post Announcement</button>
+          </form>
         </div>
       );
     }
 
-    return (
-      <div className="card">
-        <p className="text-gray-500 text-sm">Use the Moderation tab to manage approvals and reports.</p>
-      </div>
-    );
+    return null;
   }
 
   return (
     <DashboardShell
       lane="admin"
-      title="Admin & Moderation"
-      subtitle="Manage members, approvals, and community safety"
-      extraTabs={[{ id: "moderation" as Tab, label: "Moderation" }]}
+      title="Admin Panel"
+      subtitle="Members, events, resources, and moderation"
+      extraTabs={[
+        { id: "lane", label: "Members & Reports" },
+        { id: "events", label: "Manage Events" },
+        { id: "resources", label: "Manage Resources" },
+        { id: "support", label: "Announcements" },
+      ]}
     >
       {(tab) => renderTab(tab)}
     </DashboardShell>

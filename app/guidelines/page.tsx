@@ -7,34 +7,25 @@ export default function GuidelinesPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="flex-1 max-w-3xl mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold text-kingdom-navy mb-6 font-serif">Community Guidelines</h1>
-        <p className="text-gray-600 mb-8">
-          KingdomCouples is a sacred space. These guidelines protect our community and honor Christ.
-        </p>
-
+        <h1 className="text-4xl font-bold text-kingdom-navy mb-6 font-serif">Community Covenant & Code of Conduct</h1>
         <div className="space-y-6">
           {[
-            { title: "Honor God in All Things", desc: "Every interaction should reflect the love of Christ. Speak with grace, truth, and humility." },
-            { title: "Friendship First", desc: "This is not a dating app. No pressure, no pursuit, no worldly dating behavior — especially in Singles Ministry." },
-            { title: "Respect Boundaries", desc: "Consent, modesty, and personal boundaries are non-negotiable. Never pressure anyone." },
-            { title: "Protect Families", desc: "Family Side is built for households. Protect children. Report anything that feels unsafe immediately." },
-            { title: "Be Authentic", desc: "Misrepresentation breaks trust in the Body of Christ. Be honest about who you are." },
-            { title: "No Harassment", desc: "Bullying, solicitation, inappropriate content, or repeated unwanted contact will result in removal." },
-            { title: "Moderation", desc: "All accounts are reviewed upon signup. Moderators may remove content or accounts that violate these standards." },
+            { title: "Honor God", desc: "Every interaction should reflect the love of Christ." },
+            { title: "No Dating or Romance Matching", desc: "This is fellowship, not a dating or matchmaking service. No swiping, no romance profiles." },
+            { title: "No Solicitation or Spam", desc: "Commercial solicitation and spam are not permitted." },
+            { title: "No Harassment", desc: "Bullying, unwanted contact, or intimidation will result in suspension." },
+            { title: "Protect Families", desc: "No minors in adult community areas without proper guardian workflows." },
+            { title: "Be Authentic", desc: "Honest representation builds trust in the Body of Christ." },
+            { title: "Report Concerns", desc: "Use the report form in your dashboard or email support@kingdomfolk.co." },
           ].map((g, i) => (
             <div key={g.title} className="card">
-              <h2 className="font-bold text-kingdom-navy mb-2">
-                <span className="text-kingdom-gold mr-2">{i + 1}.</span>
-                {g.title}
-              </h2>
+              <h2 className="font-bold text-kingdom-navy mb-2"><span className="text-kingdom-gold mr-2">{i + 1}.</span>{g.title}</h2>
               <p className="text-gray-600 text-sm">{g.desc}</p>
             </div>
           ))}
         </div>
-
         <div className="mt-12 text-center">
-          <p className="text-gray-500 mb-4">Ready to be part of a community that honors these values?</p>
-          <Link href="/join" className="btn-primary">Join KingdomCouples</Link>
+          <Link href="/join" className="btn-primary">Join Kingdom Folk</Link>
         </div>
       </div>
       <Footer />

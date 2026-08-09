@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Lane, LANE_INFO } from "@/lib/types";
+import { Lane, LANE_INFO, MEMBERSHIP_PRICE } from "@/lib/types";
 
 const icons: Record<string, React.ReactNode> = {
   home: (
@@ -29,15 +29,13 @@ export default function LaneCard({ lane }: { lane: Lane }) {
       </div>
       <h3 className="text-2xl font-bold text-gray-900 mb-2">{info.title}</h3>
       <p className="text-sm font-semibold text-gray-500 mb-3">{info.subtitle}</p>
-      <p className="text-gray-600 mb-6 leading-relaxed">{info.description}</p>
+      <p className="text-gray-600 mb-4 leading-relaxed">{info.description}</p>
+      <p className="text-kingdom-navy font-bold mb-4">${MEMBERSHIP_PRICE}/month</p>
       <Link
         href={`/join?lane=${lane}`}
-        className={`inline-flex items-center font-bold ${info.textColor} hover:opacity-80 transition`}
+        className={`inline-flex items-center justify-center w-full font-bold py-3 rounded-full ${info.bgLight} ${info.textColor} hover:opacity-80 transition`}
       >
-        Enter {info.title}
-        <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-        </svg>
+        {info.membershipLabel}
       </Link>
     </div>
   );
