@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { Lane, LANE_INFO, membershipFromLane, MEMBERSHIP_PRICE } from "@/lib/types";
+import { Lane, LANE_INFO, membershipFromLane, MEMBERSHIP_PRICE, TRIAL_DAYS } from "@/lib/types";
 
 function JoinContent() {
   const router = useRouter();
@@ -30,6 +30,7 @@ function JoinContent() {
   const [householdName, setHouseholdName] = useState("");
   const [numberOfAdults, setNumberOfAdults] = useState("2");
   const [numberOfChildren, setNumberOfChildren] = useState("0");
+  const [accessCode, setAccessCode] = useState("");
 
   useEffect(() => {
     const laneParam = searchParams.get("lane") as Lane | null;
@@ -56,12 +57,18 @@ function JoinContent() {
           householdName: lane === "family" ? householdName : undefined,
           numberOfAdults: lane === "family" ? numberOfAdults : undefined,
           numberOfChildren: lane === "family" ? numberOfChildren : undefined,
+          accessCode: accessCode.trim() || undefined,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Registration failed");
         setSubmitting(false);
+        return;
+      }
+
+      if (data.skipPayment) {
+        router.push(`/dashboard/${lane}`);
         return;
       }
 
@@ -84,7 +91,7 @@ function JoinContent() {
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold text-kingdom-navy text-center mb-2 font-serif">Join Kingdom Folk</h1>
-        <p className="text-gray-500 text-center mb-2">${MEMBERSHIP_PRICE}/month — One Kingdom Login</p>
+        <p className="text-gray-500 text-center mb-2">{TRIAL_DAYS}-day free trial, then ${MEMBERSHIP_PRICE}/month</p>
 
         {!lane ? (
           <div className="space-y-4 mt-8">
@@ -103,7 +110,7 @@ function JoinContent() {
         ) : (
           <form onSubmit={handleSubmit} className="card space-y-4 mt-8">
             <div className="bg-kingdom-navy/5 rounded-lg px-4 py-3">
-              <p className="text-sm font-semibold text-kingdom-navy">{LANE_INFO[lane].title} — ${MEMBERSHIP_PRICE}/month</p>
+              <p className="text-sm font-semibold text-kingdom-navy">{LANE_INFO[lane].title} — {TRIAL_DAYS}-day free trial</p>
               <button type="button" onClick={() => setLane(null)} className="text-xs text-gray-500 hover:underline">Change lane</button>
             </div>
 
@@ -187,6 +194,12 @@ function JoinContent() {
               </>
             )}
 
+            <div>
+              <label className="label">Access Code (optional)</label>
+              <input className="input-field" value={accessCode} onChange={(e) => setAccessCode(e.target.value)} placeholder="Complimentary access code" />
+              <p className="text-xs text-gray-400 mt-1">Have a VIP or complimentary code? Enter it here for free access.</p>
+            </div>
+
             <label className="flex items-start gap-2 text-sm">
               <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="mt-1" required />
               <span>I accept the <Link href="/terms" className="text-kingdom-navy underline" target="_blank">Terms of Service</Link> *</span>
@@ -199,8 +212,11 @@ function JoinContent() {
             {error && <p className="text-red-600 text-sm bg-red-50 rounded-lg px-4 py-2">{error}</p>}
 
             <button type="submit" disabled={submitting} className="btn-primary w-full">
-              {submitting ? "Processing..." : `Continue to Payment — $${MEMBERSHIP_PRICE}/month`}
+              {submitting ? "Processing..." : accessCode.trim() ? "Create Account" : `Start ${TRIAL_DAYS}-Day Free Trial`}
             </button>
+            {!accessCode.trim() && (
+              <p className="text-xs text-gray-500 text-center">Card required. ${MEMBERSHIP_PRICE}/month after trial. Promo codes accepted at checkout.</p>
+            )}
           </form>
         )}
 

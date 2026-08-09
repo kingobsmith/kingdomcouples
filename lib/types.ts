@@ -3,7 +3,7 @@ export type MembershipType = "single" | "couple" | "family";
 export type UserRole = Lane | "admin";
 
 export type MembershipStatus = "pending_payment" | "active" | "inactive";
-export type SubscriptionStatus = "inactive" | "active" | "canceled" | "past_due" | "unpaid";
+export type SubscriptionStatus = "inactive" | "active" | "canceled" | "past_due" | "unpaid" | "trialing";
 
 export interface Member {
   id: string;
@@ -35,6 +35,7 @@ export interface Member {
   crmSynced: boolean;
   crmSyncError?: string;
   suspended: boolean;
+  complimentaryAccess?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -90,6 +91,7 @@ export interface Report {
 }
 
 export const MEMBERSHIP_PRICE = 9.99;
+export const TRIAL_DAYS = 7;
 
 export const LANE_INFO = {
   family: {

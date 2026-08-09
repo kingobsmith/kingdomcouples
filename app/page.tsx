@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LaneCard from "@/components/LaneCard";
 import Link from "next/link";
-import { MEMBERSHIP_PRICE } from "@/lib/types";
+import { MEMBERSHIP_PRICE, TRIAL_DAYS } from "@/lib/types";
 
 export default function HomePage() {
   return (
@@ -23,9 +23,12 @@ export default function HomePage() {
             A Christian community for singles, couples, and families seeking genuine fellowship,
             stronger covenants, and Kingdom-centered connection.
           </p>
+          <p className="text-kingdom-gold font-semibold text-sm sm:text-base mb-4">
+            {TRIAL_DAYS}-day free trial · then ${MEMBERSHIP_PRICE}/month
+          </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link href="/join" className="btn-secondary text-lg">
-              Join Kingdom Folk — ${MEMBERSHIP_PRICE}/month
+              Start Your Free Trial
             </Link>
             <a href="#lanes" className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold text-lg hover:bg-white hover:text-kingdom-navy transition">
               Choose Your Lane
@@ -57,7 +60,7 @@ export default function HomePage() {
             </div>
           </div>
           <p className="text-center text-kingdom-navy font-semibold mt-8">
-            All three lanes — ${MEMBERSHIP_PRICE}/month. One membership. You choose your lane at signup.
+            {TRIAL_DAYS}-day free trial on all lanes — then ${MEMBERSHIP_PRICE}/month. One membership. You choose your lane at signup.
           </p>
         </div>
       </section>

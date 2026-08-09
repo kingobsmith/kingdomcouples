@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
-import { getMemberById, saveMember } from "@/lib/db";
+import { getMemberById, getMemberByEmail, saveMember } from "@/lib/db";
 import { syncToCrm } from "@/lib/crm";
 import { MEMBERSHIP_PRICE } from "@/lib/types";
 
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
   async function updateMember(memberId: string, updates: {
     membershipStatus?: "active" | "inactive" | "pending_payment";
-    subscriptionStatus?: "active" | "inactive" | "canceled" | "past_due" | "unpaid";
+    subscriptionStatus?: "active" | "inactive" | "canceled" | "past_due" | "unpaid" | "trialing";
     stripeCustomerId?: string;
     stripeSubscriptionId?: string;
   }) {
@@ -42,10 +42,20 @@ export async function POST(req: NextRequest) {
     await saveMember(member);
   }
 
+  async function findMemberId(sessionOrSub: { metadata?: Stripe.Metadata | null; customer?: string | Stripe.Customer | null; customer_email?: string | null }): Promise<string | null> {
+    if (sessionOrSub.metadata?.member_id) return sessionOrSub.metadata.member_id;
+    const email = sessionOrSub.customer_email;
+    if (email) {
+      const m = await getMemberByEmail(email);
+      if (m) return m.id;
+    }
+    return null;
+  }
+
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      const memberId = session.metadata?.member_id;
+      const memberId = await findMemberId(session);
       if (memberId) {
         await updateMember(memberId, {
           membershipStatus: "active",
@@ -59,12 +69,19 @@ export async function POST(req: NextRequest) {
     case "customer.subscription.created":
     case "customer.subscription.updated": {
       const sub = event.data.object as Stripe.Subscription;
-      const memberId = sub.metadata?.member_id;
+      let memberId = sub.metadata?.member_id;
+      if (!memberId && typeof sub.customer === "string") {
+        const customer = await stripe.customers.retrieve(sub.customer);
+        if (!customer.deleted && customer.email) {
+          const m = await getMemberByEmail(customer.email);
+          if (m) memberId = m.id;
+        }
+      }
       if (!memberId) break;
       const active = sub.status === "active" || sub.status === "trialing";
       await updateMember(memberId, {
         membershipStatus: active ? "active" : "inactive",
-        subscriptionStatus: sub.status as "active" | "canceled" | "past_due" | "unpaid",
+        subscriptionStatus: (sub.status === "trialing" ? "trialing" : sub.status) as "active" | "canceled" | "past_due" | "unpaid" | "trialing",
         stripeSubscriptionId: sub.id,
         stripeCustomerId: sub.customer as string,
       });
@@ -72,7 +89,14 @@ export async function POST(req: NextRequest) {
     }
     case "customer.subscription.deleted": {
       const sub = event.data.object as Stripe.Subscription;
-      const memberId = sub.metadata?.member_id;
+      let memberId = sub.metadata?.member_id;
+      if (!memberId && typeof sub.customer === "string") {
+        const customer = await stripe.customers.retrieve(sub.customer);
+        if (!customer.deleted && customer.email) {
+          const m = await getMemberByEmail(customer.email);
+          if (m) memberId = m.id;
+        }
+      }
       if (memberId) {
         await updateMember(memberId, {
           membershipStatus: "inactive",
@@ -86,7 +110,14 @@ export async function POST(req: NextRequest) {
       const subId = invoice.subscription as string;
       if (subId) {
         const sub = await stripe.subscriptions.retrieve(subId);
-        const memberId = sub.metadata?.member_id;
+        let memberId = sub.metadata?.member_id;
+        if (!memberId && typeof sub.customer === "string") {
+          const customer = await stripe.customers.retrieve(sub.customer);
+          if (!customer.deleted && customer.email) {
+            const m = await getMemberByEmail(customer.email);
+            if (m) memberId = m.id;
+          }
+        }
         if (memberId) {
           await updateMember(memberId, {
             membershipStatus: "active",
@@ -101,7 +132,14 @@ export async function POST(req: NextRequest) {
       const subId = invoice.subscription as string;
       if (subId) {
         const sub = await stripe.subscriptions.retrieve(subId);
-        const memberId = sub.metadata?.member_id;
+        let memberId = sub.metadata?.member_id;
+        if (!memberId && typeof sub.customer === "string") {
+          const customer = await stripe.customers.retrieve(sub.customer);
+          if (!customer.deleted && customer.email) {
+            const m = await getMemberByEmail(customer.email);
+            if (m) memberId = m.id;
+          }
+        }
         if (memberId) {
           await updateMember(memberId, {
             membershipStatus: "inactive",

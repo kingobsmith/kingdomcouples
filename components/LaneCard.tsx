@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Lane, LANE_INFO, MEMBERSHIP_PRICE } from "@/lib/types";
+import { Lane, LANE_INFO, MEMBERSHIP_PRICE, TRIAL_DAYS } from "@/lib/types";
 
 const icons: Record<string, React.ReactNode> = {
   home: (
@@ -30,7 +30,8 @@ export default function LaneCard({ lane }: { lane: Lane }) {
       <h3 className="text-2xl font-bold text-gray-900 mb-2">{info.title}</h3>
       <p className="text-sm font-semibold text-gray-500 mb-3">{info.subtitle}</p>
       <p className="text-gray-600 mb-4 leading-relaxed">{info.description}</p>
-      <p className="text-kingdom-navy font-bold mb-4">${MEMBERSHIP_PRICE}/month</p>
+      <p className="text-kingdom-navy font-bold mb-1">{TRIAL_DAYS}-day free trial</p>
+      <p className="text-gray-500 text-sm mb-4">then ${MEMBERSHIP_PRICE}/month</p>
       <Link
         href={`/join?lane=${lane}`}
         className={`inline-flex items-center justify-center w-full font-bold py-3 rounded-full ${info.bgLight} ${info.textColor} hover:opacity-80 transition`}

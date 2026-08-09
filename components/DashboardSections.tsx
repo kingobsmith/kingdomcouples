@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
-import { Lane, SafeMember, PlatformEvent, Resource, Announcement, MEMBERSHIP_PRICE } from "@/lib/types";
+import { Lane, SafeMember, PlatformEvent, Resource, Announcement, MEMBERSHIP_PRICE, TRIAL_DAYS } from "@/lib/types";
 import { Tab } from "./DashboardShell";
 import Link from "next/link";
 
@@ -19,10 +19,11 @@ export function Paywall() {
   return (
     <div className="card text-center py-12">
       <h2 className="text-2xl font-bold text-kingdom-navy mb-4">Complete Your Membership</h2>
-      <p className="text-gray-600 mb-6">Your account is registered. Activate your membership to access the dashboard.</p>
-      <p className="text-kingdom-navy font-bold text-xl mb-6">${MEMBERSHIP_PRICE}/month</p>
+      <p className="text-gray-600 mb-2">Your account is registered. Start your {TRIAL_DAYS}-day free trial to access the dashboard.</p>
+      <p className="text-kingdom-navy font-bold text-xl mb-2">{TRIAL_DAYS}-day free trial</p>
+      <p className="text-gray-500 text-sm mb-6">Then ${MEMBERSHIP_PRICE}/month. Promo codes accepted at checkout.</p>
       {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
-      <button onClick={handlePay} className="btn-primary">Pay & Activate Membership</button>
+      <button onClick={handlePay} className="btn-primary">Start {TRIAL_DAYS}-Day Free Trial</button>
     </div>
   );
 }
@@ -55,7 +56,7 @@ export function OverviewSection({ lane }: { lane: Lane }) {
         <div className="card">
           <p className="text-sm text-gray-500">Membership Status</p>
           <p className={`text-lg font-bold ${member.membershipStatus === "active" ? "text-green-600" : "text-yellow-600"}`}>
-            {member.membershipStatus === "active" ? "Active" : member.membershipStatus === "pending_payment" ? "Pending Payment" : "Inactive"}
+            {member.complimentaryAccess ? "Complimentary" : member.subscriptionStatus === "trialing" ? "Free Trial" : member.membershipStatus === "active" ? "Active" : member.membershipStatus === "pending_payment" ? "Pending Payment" : "Inactive"}
           </p>
         </div>
         <div className="card">

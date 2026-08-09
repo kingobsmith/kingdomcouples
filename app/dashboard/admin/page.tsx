@@ -108,7 +108,7 @@ export default function AdminDashboard() {
                       <td><span className={`text-xs px-2 py-0.5 rounded-full ${m.membershipStatus === "active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>{m.membershipStatus}</span></td>
                       <td>{m.crmSynced ? "✓" : "✗"}</td>
                       <td className="text-xs text-gray-400">{m.stripeCustomerId?.slice(0, 12) || "—"}</td>
-                      <td><button onClick={() => adminAction("suspend-member", { memberId: m.id })} className="text-xs text-red-600 hover:underline">Suspend</button></td>
+                      <td><button onClick={() => adminAction("grant-free-access", { memberId: m.id })} className="text-xs text-green-600 hover:underline mr-2">Free Access</button><button onClick={() => adminAction("suspend-member", { memberId: m.id })} className="text-xs text-red-600 hover:underline">Suspend</button></td>
                     </tr>
                   ))}
                 </tbody>

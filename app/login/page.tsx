@@ -52,7 +52,7 @@ export default function LoginPage() {
 
           <div className="mt-6 pt-6 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-500">
-              New to Kingdom Folk? <Link href="/join" className="text-kingdom-navy font-semibold hover:underline">Join for $9.99/month</Link>
+              New to Kingdom Folk? <Link href="/join" className="text-kingdom-navy font-semibold hover:underline">Start your free trial</Link>
             </p>
           </div>
         </div>

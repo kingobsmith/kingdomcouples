@@ -67,6 +67,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
+  if (action === "grant-free-access") {
+    const member = await getMemberById(body.memberId);
+    if (!member) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    member.membershipStatus = "active";
+    member.subscriptionStatus = "active";
+    member.complimentaryAccess = true;
+    member.updatedAt = new Date().toISOString();
+    const { syncToCrm } = await import("@/lib/crm");
+    member.crmSynced = await syncToCrm(member);
+    await saveMember(member);
+    return NextResponse.json({ ok: true });
+  }
+
   if (action === "suspend-member") {
     const member = await getMemberById(body.memberId);
     if (!member) return NextResponse.json({ error: "Not found" }, { status: 404 });

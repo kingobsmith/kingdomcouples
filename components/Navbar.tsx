@@ -48,7 +48,7 @@ export default function Navbar() {
                   Sign In
                 </Link>
                 <Link href="/join" className="btn-primary text-sm py-2 px-5">
-                  Join — $9.99/mo
+                  Free Trial
                 </Link>
               </>
             )}
