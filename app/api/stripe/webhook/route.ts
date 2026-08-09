@@ -42,9 +42,12 @@ export async function POST(req: NextRequest) {
     await saveMember(member);
   }
 
-  async function findMemberId(sessionOrSub: { metadata?: Stripe.Metadata | null; customer?: string | Stripe.Customer | null; customer_email?: string | null }): Promise<string | null> {
-    if (sessionOrSub.metadata?.member_id) return sessionOrSub.metadata.member_id;
-    const email = sessionOrSub.customer_email;
+  async function findMemberId(data: {
+    metadata?: Stripe.Metadata | null;
+    customer_email?: string | null;
+  }): Promise<string | null> {
+    if (data.metadata?.member_id) return data.metadata.member_id;
+    const email = data.customer_email;
     if (email) {
       const m = await getMemberByEmail(email);
       if (m) return m.id;
@@ -55,7 +58,10 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      const memberId = await findMemberId(session);
+      const memberId = await findMemberId({
+        metadata: session.metadata,
+        customer_email: session.customer_email,
+      });
       if (memberId) {
         await updateMember(memberId, {
           membershipStatus: "active",
