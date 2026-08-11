@@ -1,30 +1,43 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
-import { MEMBERSHIP_PRICE } from "@/lib/types";
+import { MEMBERSHIP_PRICE, TRIAL_DAYS } from "@/lib/types";
+import { BRAND } from "@/lib/brand";
 
 export default function LearnMorePage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="flex-1 max-w-3xl mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold text-kingdom-navy mb-6 font-serif">About Kingdom Folk</h1>
+        <h1 className="text-4xl font-bold text-kingdom-navy mb-2 font-serif">About {BRAND.name}</h1>
+        <p className="text-kingdom-gold font-semibold mb-8">{BRAND.tagline}</p>
         <div className="space-y-8 text-gray-600 leading-relaxed">
           <p>
-            Kingdom Folk is a paid Christian community for singles, couples, and families.
-            Singles join for fellowship and community — not dating. Couples join for Christian mingling,
-            retreats, prayer, and accountability. Families join for devotionals, game nights, household covenants, and community.
+            {BRAND.name} is a paid Christian community for singles, couples, and families.
+            It is not a dating app and should not feel like one. We are a Kingdom-centered
+            fellowship platform with three distinct lanes.
           </p>
+          <div className="space-y-4">
+            <div className="card">
+              <h2 className="font-bold text-kingdom-sage mb-2">Family Side</h2>
+              <p className="text-sm">Households connecting with households — devotionals, game nights, household covenants, and community.</p>
+            </div>
+            <div className="card">
+              <h2 className="font-bold text-kingdom-navy mb-2">Couples Corner</h2>
+              <p className="text-sm">Married couples connecting with married couples — fellowship, retreats, prayer, and accountability.</p>
+            </div>
+            <div className="card">
+              <h2 className="font-bold text-kingdom-plum mb-2">Singles Ministry</h2>
+              <p className="text-sm">Friendship-first connection for singles — no dating pressure, no swiping, no romance matching.</p>
+            </div>
+          </div>
           <p>
-            One membership — ${MEMBERSHIP_PRICE}/month. You choose your lane at signup: Singles Ministry, Couples Corner, or Family Side.
-          </p>
-          <p>
-            This is not a dating app, matchmaking service, or swipe platform. It is a Kingdom-centered community
-            built for genuine fellowship, stronger covenants, and shared faith experiences.
+            One membership — {TRIAL_DAYS}-day free trial, then ${MEMBERSHIP_PRICE}/month.
+            You choose your lane at signup.
           </p>
         </div>
         <div className="mt-12 text-center">
-          <Link href="/join" className="btn-primary">Join Kingdom Folk — ${MEMBERSHIP_PRICE}/month</Link>
+          <Link href="/join" className="btn-primary">Join {BRAND.name}</Link>
         </div>
       </div>
       <Footer />

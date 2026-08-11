@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import DashboardShell from "@/components/DashboardShell";
 import { Paywall, renderMemberTab, InterestFormSection } from "@/components/DashboardSections";
+import { LANE_INFO } from "@/lib/types";
 
 export default function SinglesDashboard() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function SinglesDashboard() {
     <DashboardShell
       lane="singles"
       title="Singles Ministry"
-      subtitle="Fellowship and community — not dating"
+      subtitle={LANE_INFO.singles.subtitle}
       extraTabs={[{ id: "lane", label: "Singles Fellowship" }]}
     >
       {(tab) => renderMemberTab(tab, "singles",

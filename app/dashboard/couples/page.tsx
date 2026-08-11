@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import DashboardShell from "@/components/DashboardShell";
 import { Paywall, renderMemberTab, InterestFormSection } from "@/components/DashboardSections";
+import { LANE_INFO } from "@/lib/types";
 
 export default function CouplesDashboard() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function CouplesDashboard() {
     <DashboardShell
       lane="couples"
       title="Couples Corner"
-      subtitle="Christian mingling, prayer, retreats, and accountability"
+      subtitle={LANE_INFO.couples.subtitle}
       extraTabs={[{ id: "lane", label: "Couples Resources" }]}
     >
       {(tab) => renderMemberTab(tab, "couples",

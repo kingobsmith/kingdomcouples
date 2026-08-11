@@ -17,6 +17,7 @@ export function getTrialDays(): number {
 export function membershipMetadata(type: MembershipType) {
   return {
     platform: "kingdom_folk",
+    product: "Kingdom Folk Membership",
     membership_type: type,
     crm_source: "kingdomfolk.co",
   };

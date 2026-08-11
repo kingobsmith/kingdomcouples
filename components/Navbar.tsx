@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { getDashboardPath } from "@/lib/types";
+import { BRAND } from "@/lib/brand";
 
 export default function Navbar() {
   const { member, logout } = useAuth();
@@ -15,17 +16,24 @@ export default function Navbar() {
             <span className="text-2xl sm:text-3xl font-extrabold text-kingdom-navy tracking-tight font-serif">
               Kingdom <span className="text-kingdom-gold">Folk</span>
             </span>
+            <span className="hidden lg:block text-xs text-gray-500 mt-0.5">{BRAND.tagline}</span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="/#lanes" className="text-gray-600 hover:text-kingdom-navy font-medium transition">
-              Membership Lanes
+          <div className="hidden md:flex items-center space-x-6">
+            <a href="/#family" className="text-gray-600 hover:text-kingdom-navy font-medium transition text-sm">
+              Family Side
             </a>
-            <Link href="/learn-more" className="text-gray-600 hover:text-kingdom-navy font-medium transition">
-              Learn More
+            <a href="/#couples" className="text-gray-600 hover:text-kingdom-navy font-medium transition text-sm">
+              Couples Corner
+            </a>
+            <a href="/#singles" className="text-gray-600 hover:text-kingdom-navy font-medium transition text-sm">
+              Singles Ministry
+            </a>
+            <Link href="/learn-more" className="text-gray-600 hover:text-kingdom-navy font-medium transition text-sm">
+              About
             </Link>
-            <Link href="/guidelines" className="text-gray-600 hover:text-kingdom-navy font-medium transition">
-              Community Covenant
+            <Link href="/guidelines" className="text-gray-600 hover:text-kingdom-navy font-medium transition text-sm">
+              Covenant
             </Link>
           </div>
 
@@ -48,7 +56,7 @@ export default function Navbar() {
                   Sign In
                 </Link>
                 <Link href="/join" className="btn-primary text-sm py-2 px-5">
-                  Free Trial
+                  Join — Free Trial
                 </Link>
               </>
             )}

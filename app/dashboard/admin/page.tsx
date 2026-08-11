@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import DashboardShell from "@/components/DashboardShell";
 import { SafeMember, PlatformEvent, Resource, Announcement, Report, Lane } from "@/lib/types";
+import { BRAND } from "@/lib/brand";
 import { Tab } from "@/components/DashboardShell";
 
 export default function AdminDashboard() {
@@ -205,7 +206,7 @@ export default function AdminDashboard() {
   return (
     <DashboardShell
       lane="admin"
-      title="Admin Panel"
+      title={`${BRAND.name} Admin`}
       subtitle="Members, events, resources, and moderation"
       extraTabs={[
         { id: "lane", label: "Members & Reports" },

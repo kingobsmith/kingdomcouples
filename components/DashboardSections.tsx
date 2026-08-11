@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Lane, SafeMember, PlatformEvent, Resource, Announcement, MEMBERSHIP_PRICE, TRIAL_DAYS } from "@/lib/types";
+import { BRAND } from "@/lib/brand";
 import { Tab } from "./DashboardShell";
 import Link from "next/link";
 
@@ -49,7 +50,7 @@ export function OverviewSection({ lane }: { lane: Lane }) {
     <div className="space-y-6">
       <div className="card">
         <h2 className="text-xl font-bold text-kingdom-navy mb-2">Welcome, {member.fullName}</h2>
-        <p className="text-gray-600">Your Kingdom Folk membership dashboard.</p>
+        <p className="text-gray-600">Your {BRAND.name} membership dashboard.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -110,7 +111,7 @@ export function EventsSection({ lane }: { lane: Lane }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-kingdom-navy">Upcoming Kingdom Folk Events</h2>
+      <h2 className="text-xl font-bold text-kingdom-navy">Upcoming {BRAND.name} Events</h2>
       {events.length === 0 && <p className="text-gray-500 text-sm">No events scheduled yet.</p>}
       {events.map((e) => (
         <div key={e.id} className="card">
@@ -222,7 +223,7 @@ export function SupportSection() {
     <div className="space-y-6">
       <div className="card">
         <h2 className="text-xl font-bold text-kingdom-navy mb-4">Contact Support</h2>
-        <p className="text-gray-600 text-sm">Email: <a href="mailto:support@kingdomfolk.co" className="text-kingdom-navy underline">support@kingdomfolk.co</a></p>
+        <p className="text-gray-600 text-sm">Email: <a href={`mailto:${BRAND.supportEmail}`} className="text-kingdom-navy underline">{BRAND.supportEmail}</a></p>
       </div>
       <div className="card">
         <h3 className="font-bold text-kingdom-navy mb-4">Report a Concern</h3>

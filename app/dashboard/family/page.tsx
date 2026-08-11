@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import DashboardShell from "@/components/DashboardShell";
 import { Paywall, renderMemberTab, InterestFormSection } from "@/components/DashboardSections";
+import { LANE_INFO } from "@/lib/types";
 
 export default function FamilyDashboard() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function FamilyDashboard() {
     <DashboardShell
       lane="family"
       title={member.householdName || "Family Side"}
-      subtitle="Devotionals, game nights, household covenants, and community"
+      subtitle={LANE_INFO.family.subtitle}
       extraTabs={[{ id: "lane", label: "Family Resources" }]}
     >
       {(tab) => renderMemberTab(tab, "family",

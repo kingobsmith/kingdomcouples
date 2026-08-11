@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { Lane, LANE_INFO, membershipFromLane, MEMBERSHIP_PRICE, TRIAL_DAYS } from "@/lib/types";
+import { BRAND } from "@/lib/brand";
 
 function JoinContent() {
   const router = useRouter();
@@ -90,7 +91,8 @@ function JoinContent() {
     <div className="min-h-screen bg-kingdom-cream">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold text-kingdom-navy text-center mb-2 font-serif">Join Kingdom Folk</h1>
+        <h1 className="text-3xl font-bold text-kingdom-navy text-center mb-2 font-serif">Join {BRAND.name}</h1>
+        <p className="text-kingdom-gold text-center text-sm font-medium mb-1">{BRAND.tagline}</p>
         <p className="text-gray-500 text-center mb-2">{TRIAL_DAYS}-day free trial, then ${MEMBERSHIP_PRICE}/month</p>
 
         {!lane ? (

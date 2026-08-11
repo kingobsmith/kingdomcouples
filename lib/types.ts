@@ -96,9 +96,9 @@ export const TRIAL_DAYS = 7;
 export const LANE_INFO = {
   family: {
     title: "Family Side",
-    subtitle: "Devotionals, game nights, household covenants, and community",
+    subtitle: "Households connecting with households",
     description:
-      "Join for family devotionals, game nights, household covenants, and shared experiences with other Kingdom families.",
+      "Build Kingdom family networks through devotionals, game nights, household covenants, and shared experiences with other families.",
     membershipLabel: "Choose Family Membership",
     membershipType: "family" as MembershipType,
     borderColor: "border-kingdom-sage",
@@ -108,9 +108,9 @@ export const LANE_INFO = {
   },
   couples: {
     title: "Couples Corner",
-    subtitle: "Christian mingling, prayer, retreats, and accountability",
+    subtitle: "Married couples connecting with married couples",
     description:
-      "Join for Christian mingling, retreats, prayer, marriage devotionals, and accountability with other covenant couples.",
+      "Fellowship, retreats, prayer, marriage devotionals, and accountability with other covenant couples — not a dating platform.",
     membershipLabel: "Choose Couples Membership",
     membershipType: "couple" as MembershipType,
     borderColor: "border-kingdom-navy",
@@ -120,9 +120,9 @@ export const LANE_INFO = {
   },
   singles: {
     title: "Singles Ministry",
-    subtitle: "Fellowship and community — not dating",
+    subtitle: "Friendship-first connection — no dating pressure",
     description:
-      "Join for genuine Christian fellowship and community without dating pressure, romance matching, or swiping.",
+      "Genuine Christian fellowship and community for singles. Friendship comes first — not romance matching, swiping, or dating-app culture.",
     membershipLabel: "Choose Singles Membership",
     membershipType: "single" as MembershipType,
     borderColor: "border-kingdom-plum",

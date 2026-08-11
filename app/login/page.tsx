@@ -6,6 +6,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/lib/auth";
 import { getDashboardPath } from "@/lib/types";
+import { BRAND } from "@/lib/brand";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function LoginPage() {
         <div className="card">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-kingdom-navy font-serif">One Kingdom Login</h1>
-            <p className="text-sm text-gray-500 mt-2">Sign in to your Kingdom Folk membership</p>
+            <p className="text-sm text-gray-500 mt-2">Sign in to your {BRAND.name} membership</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -52,7 +53,7 @@ export default function LoginPage() {
 
           <div className="mt-6 pt-6 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-500">
-              New to Kingdom Folk? <Link href="/join" className="text-kingdom-navy font-semibold hover:underline">Start your free trial</Link>
+              New to {BRAND.name}? <Link href="/join" className="text-kingdom-navy font-semibold hover:underline">Start your free trial</Link>
             </p>
           </div>
         </div>
